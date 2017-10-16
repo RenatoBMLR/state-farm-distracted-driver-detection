@@ -33,10 +33,6 @@ Requisitos para rodar o acelerador. Ex:
 
 -   Matplotlib 2.0.2+
 
--   Keras 2.0.6+
-
--   Scikit-learn 0.19 +
-
 
 # Installation
 
