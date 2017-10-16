@@ -27,7 +27,7 @@ class get_data():
         immatrix = []
         imlabel = []
         
-        files = glob.glob (self.path2data + "*.PNG")
+        files = glob.glob (self.path2data + "*.jpeg")
         for myFile in files:    
             base = os.path.basename(myFile)
             fileName = os.path.splitext(base)[0]
