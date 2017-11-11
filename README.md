@@ -58,9 +58,3 @@ Check for the versions of listed on Requirements sessions and in case that is so
 $ conda update anaconda
 
 ```
-
-To install [Keras](https://keras.io)  you just need to type `conda install -c conda-forge keras` on your terminal.
-
-# Programming Guide
-
-Guia das principais funcionalidades do programa :
