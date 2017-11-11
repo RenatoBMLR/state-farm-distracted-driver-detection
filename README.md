@@ -1,4 +1,4 @@
-# Diabetic retinopathy detection
+# State Farm Distracted Driver Detection
 ![MKT](https://img.shields.io/badge/version-v0.1-blue.svg)
 ![MKT](https://img.shields.io/badge/language-Python-orange.svg)
 ![MKT](https://img.shields.io/badge/platform-Jupyter-lightgrey.svg)
@@ -6,20 +6,12 @@
 
 # Description
 
-Descrição sobre a finalidade do
+The objective of this task is to classify each driver's behavior. The dataset used is from the Kraggle competition: https://www.kaggle.com/c/state-farm-distracted-driver-detection.
+
+![alt text](https://github.com/RenatoBMLR/Facial_Keypoints_Detection/blob/master/figures/data.png)
 
 
-**Features**
-
-Lista com as capacidades do acelerador desenvolvido.
-
--   Feature 1;
-
--   Feature 2,
-
--  Feature n;
-
-
+This project was made using PyTorch, which is a python module that uses Tensors and dynamical Neural Networks to optimize GPU operations.
 
 # Requirements
 
@@ -32,6 +24,8 @@ Requisitos para rodar o acelerador. Ex:
 -   Numpy 1.13.1+
 
 -   Matplotlib 2.0.2+
+
+-   PyTorch
 
 
 # Installation
