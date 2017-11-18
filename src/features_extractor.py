@@ -1,6 +1,7 @@
 import torchvision
 import torch
 from torch.autograd import Variable
+import torch.nn.functional as F
 
 nb_out = 10;
 
@@ -58,11 +59,13 @@ class MyResNet(torch.nn.Module):
 
 
 
-class myInceptionConv(torchvision.models.Inception3):
+class MyInceptionConv(torchvision.models.Inception3):
     def __init__(self, fixed_extractor = True):
         super().__init__(torchvision.models.inception_v3(pretrained=True))
         self.load_state_dict(torch.utils.model_zoo.load_url(
             'https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth)'))
+        
+        del self.fc
         
         if fixed_extractor:
             for param in self.parameters():
@@ -85,13 +88,60 @@ class MyInceptiontDens(torch.nn.Module):
 class MyInception(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.mrnc = myInceptionConv()
+        self.mrnc = MyInceptionConv()
         self.mrnd = MyInceptiontDens()
     def forward(self, x):
         x = self.mrnc(x)
         x = self.mrnd(x)
         return x 
+
+#********************************************             DenseNet               ***********************************************     
+
+class MyDenseNetConv(torch.nn.Module):
+    def __init__(self, fixed_extractor = True):
+        super(MyDenseNetConv,self).__init__()
+        original_model = torchvision.models.densenet161(pretrained=True)
+        self.features = torch.nn.Sequential(*list(original_model.children())[:-1])
         
+        if fixed_extractor:
+            for param in self.parameters():
+                param.requires_grad = False
+
+    def forward(self, x):
+        x = self.features(x)
+        x = F.relu(x, inplace=True)
+        x = F.avg_pool2d(x, kernel_size=7).view(x.size(0), -1)
+        return x
+        
+class MyDenseNetDens(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.dens1 = torch.nn.Linear(in_features=2208, out_features=512)
+        self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
+        self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
+    def forward(self, x):
+        x = self.dens1(x)
+        x = torch.nn.functional.selu(x)
+        x = self.dens2(x)
+        x = torch.nn.functional.selu(x)
+        x = self.dens3(x)
+        return x
+
+
+
+class MyDenseNet(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.mrnc = MyDenseNetConv()
+        self.mrnd = MyDenseNetDens()
+    def forward(self, x):
+        x = self.mrnc(x)
+        x = self.mrnd(x)
+        return x 
+
+    
+    
+    
 #********************************************           Predicting Features       *********************************************** 
 
 def ExtractFeatures(dset_loaders, model,use_gpu=False,):
