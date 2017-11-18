@@ -1,5 +1,5 @@
 
-
+import torch
 from torch.utils.data import DataLoader
 
 
@@ -21,6 +21,7 @@ def _create_dataLoader(dsets, batch_size, num_workers= None, use_gpu=None,use_Da
     dset_loaders = {}
    
     if use_gpu:
+
         for key in dsets.keys():
             dset_loaders[key] = DataLoader(dsets[key], batch_size=batch_size, 
                                            shuffle=shuffle, num_workers= 1, pin_memory=use_gpu)
@@ -29,7 +30,7 @@ def _create_dataLoader(dsets, batch_size, num_workers= None, use_gpu=None,use_Da
             dset_loaders[key] = DataLoader(dsets[key], batch_size=batch_size, 
                                            shuffle=shuffle)
 
-    else:
+    if use_gpu == False and use_DataParalel== False:
         for key in dsets.keys():
             dset_loaders[key] = DataLoader(dsets[key], batch_size=batch_size, 
                                            shuffle=shuffle, num_workers= num_workers, pin_memory=False)            

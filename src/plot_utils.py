@@ -1,8 +1,14 @@
 import numpy as np
 import random
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from src.imgnet_utils import denormalize
+import torchvision
+import torch
+from torch.autograd import Variable
+
+
 
 
 
@@ -95,4 +101,83 @@ def classDistribution(dataset, path2save= './figures/class_distribution.png'):
     path2save = './figures/distribution_classes.png'
     fig.savefig(path2save)
     
-  
+def plot_metrics(trainer): 
+
+    path2save = './figures/results_metrics.png'
+
+    fig = plt.figure(figsize=(10,5))
+    metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
+
+    metrics_eval_nb = len(trainer.metrics['train'].keys())
+    count = 1
+    for metric in trainer.metrics['train'].keys():
+        plt.subplot(1,metrics_eval_nb, count)
+        plt.plot(trainer.metrics['train'][metric], 'o-b', label = 'train')
+        plt.plot(trainer.metrics['valid'][metric], 'o-r', label = 'valid')
+        count += 1
+        plt.xlabel('Epochs', fontsize = 12)
+        plt.ylabel(metrics_map[metric], fontsize = 12)
+        plt.title(metrics_map[metric] + " during the model's training", fontsize = 16)
+        plt.grid('on')
+        plt.legend()
+    fig.savefig(path2save)
+    
+def visualize_predictions(dsets, lst, result_train, path2save = []):
+    maxSubPlot = 4
+    if len(lst)<4:
+        maxSubPlot = len(lst)
+    fig = plt.figure(figsize=(15,6))
+    for i, j in enumerate(range(0,maxSubPlot)):
+        fig.add_subplot(1, maxSubPlot, i+1)
+        (inputs, output) = dsets[lst[j]]
+        img = denormalize(inputs.numpy())
+        img = np.clip(img, 0, 1.0)
+        plt.imshow(img)
+        #plt.title('{0} / {1}'.format(labels['c'+str(output)],  labels[('c'+str(result_train['pred'][lst[j]]))]))    
+        plt.title('{0} / {1}'.format(('c'+str(output)),  ('c'+str(result_train['pred'][lst[j]]))))    
+        plt.axis('off')
+    if len(path2save) !=0:
+        fig.savefig(path2save)    
+
+def plot_confusion(results):
+    mc = np.array(pd.crosstab(results['pred'], results['true']))
+    plt.imshow(mc/mc.sum(axis=1))
+    plt.colorbar()
+    plt.axis('off')
+    
+def plot_cm_train_valid(result_train,result_valid):    
+    plt.figure(figsize=(20,5))
+    plt.subplot(1,2,1)
+    plot_confusion(result_train)
+    plt.title('Train dataset')
+    plt.subplot(1,2,2)
+    plot_confusion(result_valid)
+    plt.title('Valid dataset')
+
+    
+def plot_layers_weight(dsets,img_width, img_height, conv_model,use_gpu, ncols = 8, H = 14, W=30):
+
+
+    rand_idx = random.randrange(0, len(dsets['train']))
+    input, _ = dsets['train'][rand_idx]
+    input = input.view(1, 3, img_width, img_height)
+
+    if use_gpu:
+        x = Variable(input.cuda())
+    else:
+        x = Variable(input)
+
+
+    for name, layer in conv_model.named_children():
+        x = layer(x)
+        grid = torchvision.utils.make_grid(torch.transpose(x.data, 0, 1), normalize=True, 
+                                           pad_value=1.0, padding=1).cpu().numpy()
+
+        if name == 'max_pool':
+            H /= 3/2
+            W /= 3/2
+        fig = plt.figure(figsize=(H,W))
+        plt.imshow(grid.transpose((1,2,0)))
+        plt.title(name)
+        plt.axis('off')
+        plt.show()    

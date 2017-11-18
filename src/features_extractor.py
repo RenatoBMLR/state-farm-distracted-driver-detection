@@ -94,15 +94,23 @@ class MyInception(torch.nn.Module):
         
 #********************************************           Predicting Features       *********************************************** 
 
-def ExtractFeatures(dset_loaders, model,use_gpu=False):
+def ExtractFeatures(dset_loaders, model,use_gpu=False,):
     '''
     This function returns the features of the features extractor model which have been trained on ImageNet dataset.
+    Arguments : 
+        dset_loaders: Dataset Loader;
+        model : Pretrained model which will act as a feature extractor;
+        use_gpu: Flag to use only one GPU;
+        device_id: Id of which GPU will be used;
+    
+    
     '''
     predictions = []
     labels_lst = []
     ii_n = len(dset_loaders)
 
     for i, (inputs, labels) in enumerate(dset_loaders):
+        
         if use_gpu:
             inputs = inputs.cuda()
             labels = labels.cuda()
@@ -117,5 +125,12 @@ def ExtractFeatures(dset_loaders, model,use_gpu=False):
         return {'pred': torch.cat(predictions, 0), 'true':torch.cat(labels_lst, 0) }
 
 
+def getPrediction(result_valid):
+    _, predicted = torch.max(result_valid, 1)
+    return predicted 
 
+def tensor2numpy(result):
+    if result.type() == 'torch.cuda.LongTensor':
+        result = result.cpu()
+    return result.numpy()
     
