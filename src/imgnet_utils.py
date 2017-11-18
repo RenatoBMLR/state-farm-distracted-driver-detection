@@ -2,7 +2,7 @@ import numpy as np
 
 
 
-img_size ,img_width, img_height = 224, 224, 224
+img_size ,img_width, img_height = 300, 300, 300
 
 def my_transforms(img, img_width=img_width, img_height=img_height):
     return img.resize((img_width, img_height))

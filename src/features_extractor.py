@@ -6,7 +6,7 @@ import torch.nn.functional as F
 nb_out = 10;
 
 
-#ResNet
+#********************************************             ResNet                 ************************************************ 
 
 class MyResNetConv(torchvision.models.ResNet):
     def __init__(self, fixed_extractor = True):
@@ -55,32 +55,47 @@ class MyResNet(torch.nn.Module):
         x = self.mrnd(x)
         return x
 
-#********************************************             Inception               ***********************************************     
+#********************************************             Inception               *********************************************** 
+
+# https://github.com/pytorch/vision/blob/master/torchvision/models/inception.py
+
+# http://andersonjo.github.io/artificial-intelligence/2017/05/13/Transfer-Learning/
 
 
-
-class MyInceptionConv(torchvision.models.Inception3):
+class MyInceptionConv(torch.nn.Module):
     def __init__(self, fixed_extractor = True):
-        super().__init__(torchvision.models.inception_v3(pretrained=True))
-        self.load_state_dict(torch.utils.model_zoo.load_url(
-            'https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth)'))
+        super(MyInceptionConv,self).__init__()
         
-        del self.fc
+        self.model = torchvision.models.inception_v3(pretrained=True)
+        self.model.aux_logits= False # AH CARAI !!!! 
+
+
+        n_features = self.model.fc.in_features
+        self.model.fc = torch.nn.Linear(n_features, 2500)
         
         if fixed_extractor:
-            for param in self.parameters():
+            for param in self.model.parameters():
                 param.requires_grad = False
+                
+        
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
 
 
 class MyInceptiontDens(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.dens1 = torch.nn.Linear(in_features=64, out_features=32)
-        self.dens2 = torch.nn.Linear(in_features=32, out_features=nb_out)
+        self.dens1 = torch.nn.Linear(in_features=2500, out_features=512)
+        self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
+        self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
         x = self.dens2(x)
+        x = torch.nn.functional.selu(x)
+        x = self.dens3(x)
         return x
 
 
@@ -95,7 +110,13 @@ class MyInception(torch.nn.Module):
         x = self.mrnd(x)
         return x 
 
+
+
 #********************************************             DenseNet               ***********************************************     
+# http://pytorch.org/docs/0.2.0/_modules/torchvision/models/densenet.html
+
+# https://discuss.pytorch.org/t/densenet-transfer-learning/7776
+
 
 class MyDenseNetConv(torch.nn.Module):
     def __init__(self, fixed_extractor = True):
