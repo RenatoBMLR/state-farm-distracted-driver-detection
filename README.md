@@ -11,7 +11,7 @@ The objective of this task is to classify each driver's behavior. The dataset us
 ![alt text](https://github.com/RenatoBMLR/state-farm-distracted-driver-detection/blob/master/figures/data.png)
 
 
-This project was made using PyTorch, which is a python module that uses Tensors and dynamical Neural Networks to optimize GPU operations.
+This project was made using mainly [PyTorch](http://pytorch.org) and Deep Neural Networks with operations optimized by GPU.
 
 # Requirements
 
@@ -25,7 +25,7 @@ Requisitos para rodar o acelerador. Ex:
 
 -   Matplotlib 2.0.2+
 
--   PyTorch
+-   PyTorch 0.2.0_3 +
 
 
 # Installation
