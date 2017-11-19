@@ -11,7 +11,13 @@ The objective of this task is to classify each driver's behavior. The dataset us
 ![alt text](https://github.com/RenatoBMLR/state-farm-distracted-driver-detection/blob/master/figures/data.png)
 
 
-This project was made using mainly [PyTorch](http://pytorch.org) and Deep Neural Networks with operations optimized by GPU.
+This project was made using mainly PyTorch and some Deep Neural Networks with operations optimized by GPU. The convolutional neural networks architectures usede are presented below:
+
+- [ResNet](https://arxiv.org/abs/1512.03385)
+
+- [InceptionV3](https://arxiv.org/abs/1512.00567)
+
+- [DenseNet](https://arxiv.org/abs/1608.06993)
 
 # Requirements
 
@@ -36,7 +42,7 @@ This notebook was developed in [Jupyter Notebook](http://jupyter.org) using [Ana
 
 ## Anaconda
 
-Go to the [link](https://www.anaconda.com/download/#download) and download the version suited to your platform.
+Go to [Anaconda](https://www.anaconda.com/download/#download) download web page and download the version best suited to your platform.
 
 The Installation process is quite simple just follow the assistant that is provided when it is launched the application.
 
@@ -56,5 +62,16 @@ Check for the versions of listed on Requirements sessions and in case that is so
 
 ```
 $ conda update anaconda
+
+```
+
+## Pytorch
+
+Go to the [pytorch](http://pytorch.org) web page and choose the version of the libraries installed on your system. It is important that they folllow the packages version described on Requriments section. 
+
+After installing conda, use the following code via terminal.
+
+```
+$ conda install pytorch torchvision cuda80 -c soumith
 
 ```
