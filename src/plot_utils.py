@@ -121,8 +121,15 @@ def plot_metrics(trainer):
         plt.grid('on')
         plt.legend()
     fig.savefig(path2save)
+
+        
+def visualize_predictions(dsets, results, path2save = [], correct_pred = True):
     
-def visualize_predictions(dsets, lst, result_train, path2save = []):
+    if correct_pred == True:
+        lst = np.where(results['true'] == results['pred'])[0]
+    else:
+        lst = np.where(results['true'] != results['pred'])[0]
+    
     maxSubPlot = 4
     if len(lst)<4:
         maxSubPlot = len(lst)
@@ -133,8 +140,8 @@ def visualize_predictions(dsets, lst, result_train, path2save = []):
         img = denormalize(inputs.numpy())
         img = np.clip(img, 0, 1.0)
         plt.imshow(img)
-        #plt.title('{0} / {1}'.format(labels['c'+str(output)],  labels[('c'+str(result_train['pred'][lst[j]]))]))    
-        plt.title('{0} / {1}'.format(('c'+str(output)),  ('c'+str(result_train['pred'][lst[j]]))))    
+        #plt.title('{0} / {1}'.format(labels['c'+str(output)],  labels[('c'+str(results['pred'][lst[j]]))]))    
+        plt.title('{0} / {1}'.format(('c'+str(output)),  ('c'+str(results['pred'][lst[j]]))))    
         plt.axis('off')
     if len(path2save) !=0:
         fig.savefig(path2save)    

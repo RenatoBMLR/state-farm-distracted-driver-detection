@@ -196,12 +196,9 @@ def ExtractFeatures(dset_loaders, model,use_gpu=False,):
         return {'pred': torch.cat(predictions, 0), 'true':torch.cat(labels_lst, 0) }
 
 
-def getPrediction(result_valid):
-    _, predicted = torch.max(result_valid, 1)
-    return predicted 
-
-def tensor2numpy(result):
-    if result.type() == 'torch.cuda.LongTensor':
-        result = result.cpu()
-    return result.numpy()
+def getPrediction(result):
+    _, predicted = torch.max(result['pred'], 1)
+    result['pred'] = predicted.cpu().numpy()
+    result['true'] = result['true'].cpu().numpy()
+    return result 
     
