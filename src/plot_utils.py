@@ -93,8 +93,8 @@ def classDistribution(dataset, path2save= './figures/class_distribution.png'):
         class_str.append(labels['c'+str(item)])  
     fig = plt.figure(figsize=(8,10))
     sns.countplot(y=class_str, palette="Greens_d");
-    plt.xlabel("Classes", fontsize=12)
-    plt.ylabel('Counts', fontsize=12)
+    plt.ylabel("Classes", fontsize=12)
+    plt.xlabel('Count', fontsize=12)
     plt.xticks(rotation=90)
     plt.title("Classes Distribution", fontsize=15)
     plt.show()

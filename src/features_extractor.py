@@ -165,7 +165,7 @@ class MyDenseNet(torch.nn.Module):
     
 #********************************************           Predicting Features       *********************************************** 
 
-def ExtractFeatures(dset_loaders, model,use_gpu=False,):
+def predict(dset_loaders, model,use_gpu=False):
     '''
     This function returns the features of the features extractor model which have been trained on ImageNet dataset.
     Arguments : 
@@ -194,6 +194,8 @@ def ExtractFeatures(dset_loaders, model,use_gpu=False,):
     print(' ok')
     if len(predictions) > 0:
         return {'pred': torch.cat(predictions, 0), 'true':torch.cat(labels_lst, 0) }
+
+
 
 
 def getPrediction(result):
