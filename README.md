@@ -21,8 +21,6 @@ This project was made using mainly PyTorch and some Deep Neural Networks with op
 
 # Requirements
 
-Requisitos para rodar o acelerador. Ex:
-
 -   Python 3.6+
 
 -   Jupyter Notebook 5.0+
