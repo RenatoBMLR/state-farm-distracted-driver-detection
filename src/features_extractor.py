@@ -33,7 +33,7 @@ class MyResNetConv(torchvision.models.ResNet):
 class MyResNetDens(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.dens1 = torch.nn.Linear(in_features=4096, out_features=512)
+        self.dens1 = torch.nn.Linear(in_features=6400, out_features=512)
         self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
         self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
     def forward(self, x):
