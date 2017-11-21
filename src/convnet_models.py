@@ -36,13 +36,14 @@ class MyResNetDens(torch.nn.Module):
         self.dens1 = torch.nn.Linear(in_features=6400, out_features=512)
         self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
         self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
+        
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
-
+        x = torch.nn.functional.softmax(x)
         return x
 
 class MyResNet(torch.nn.Module):
@@ -50,6 +51,7 @@ class MyResNet(torch.nn.Module):
         super().__init__()
         self.mrnc = MyResNetConv()
         self.mrnd = MyResNetDens()
+        
     def forward(self, x):
         x = self.mrnc(x)
         x = self.mrnd(x)
@@ -90,12 +92,15 @@ class MyInceptiontDens(torch.nn.Module):
         self.dens1 = torch.nn.Linear(in_features=2500, out_features=512)
         self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
         self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
+        
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
+        x = torch.nn.functional.softmax(x)
+
         return x
 
 
@@ -140,12 +145,15 @@ class MyDenseNetDens(torch.nn.Module):
         self.dens1 = torch.nn.Linear(in_features=2208, out_features=512)
         self.dens2 = torch.nn.Linear(in_features=512, out_features=128)
         self.dens3 = torch.nn.Linear(in_features=128, out_features=nb_out)
+        
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
+        x = torch.nn.functional.softmax(x)
+
         return x
 
 
@@ -159,48 +167,3 @@ class MyDenseNet(torch.nn.Module):
         x = self.mrnc(x)
         x = self.mrnd(x)
         return x 
-
-    
-    
-    
-#********************************************           Predicting Features       *********************************************** 
-
-def predict(dset_loaders, model,use_gpu=False):
-    '''
-    This function returns the features of the features extractor model which have been trained on ImageNet dataset.
-    Arguments : 
-        dset_loaders: Dataset Loader;
-        model : Pretrained model which will act as a feature extractor;
-        use_gpu: Flag to use only one GPU;
-        device_id: Id of which GPU will be used;
-    
-    
-    '''
-    predictions = []
-    labels_lst = []
-    ii_n = len(dset_loaders)
-
-    for i, (inputs, labels) in enumerate(dset_loaders):
-        
-        if use_gpu:
-            inputs = inputs.cuda()
-            labels = labels.cuda()
-            
-        inputs = Variable(inputs)
-        predictions.append(model(inputs).data)
-        labels_lst.append(labels)
-
-        print('\rpredict: {}/{}'.format(i, ii_n - 1), end='')
-    print(' ok')
-    if len(predictions) > 0:
-        return {'pred': torch.cat(predictions, 0), 'true':torch.cat(labels_lst, 0) }
-
-
-
-
-def getPrediction(result):
-    _, predicted = torch.max(result['pred'], 1)
-    result['pred'] = predicted.cpu().numpy()
-    result['true'] = result['true'].cpu().numpy()
-    return result 
-    
