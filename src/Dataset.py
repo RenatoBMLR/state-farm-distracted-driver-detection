@@ -1,4 +1,5 @@
 import os
+import re
 import glob
 import numpy as np
 import numpy.random as nr
@@ -38,8 +39,8 @@ class KaggleSafeDriverDataset(Dataset):
                  is_test=False,is_val=False,val_size=0.2):
     
         self.transform = transforms        
-        
-        if is_test:
+        self.is_test = is_test
+        if self.is_test:
 
             X_test    = []
             path  = os.path.join(path, '*.jpg')
@@ -50,7 +51,7 @@ class KaggleSafeDriverDataset(Dataset):
             only = int(use_only * length)
             self.X = X_test[:only]
             
-            self.y = None # In order to create the Dataloader of test data it has to have a y coordenate.
+            self.y = np.zeros([len(self.X), 1]) # In order to create the Dataloader of test data it has to have a y coordenate.
         
         else:
 
@@ -89,6 +90,10 @@ class KaggleSafeDriverDataset(Dataset):
         path = self.X[index]
         label = self.y[index]
         with open(path, 'rb') as f:
+            flbase = os.path.basename(path)
+            if self.is_test:
+                id_img = re.findall('\d+', flbase)
+                label = int(id_img[0])
             with Image.open(f) as img:
                  image = img.convert('RGB')
         if self.transform is not None:
