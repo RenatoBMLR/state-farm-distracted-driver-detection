@@ -1,11 +1,14 @@
 import pandas as pd
 import os
 import datetime
-
+import torch
+import numpy as np
 
 def create_submission(result, info):
     
-    predictions = result['pred'].tolist()
+    m = torch.nn.Softmax()
+    predictions =  np.around(m(result['pred']).cpu().data.numpy(), decimals=1).tolist()
+    
     test_id = result['true'].tolist()
     for i in range(0, len(test_id)):
         test_id[i] = 'img_'+ str(test_id[i]) + '.jpg'

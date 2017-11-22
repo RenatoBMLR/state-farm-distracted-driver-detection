@@ -43,7 +43,6 @@ class MyResNetDens(torch.nn.Module):
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
-        x = torch.nn.functional.softmax(x)
         return x
 
 class MyResNet(torch.nn.Module):
@@ -99,7 +98,6 @@ class MyInceptiontDens(torch.nn.Module):
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
-        x = torch.nn.functional.softmax(x)
 
         return x
 
@@ -152,7 +150,6 @@ class MyDenseNetDens(torch.nn.Module):
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
         x = self.dens3(x)
-        x = torch.nn.functional.softmax(x)
 
         return x
 
