@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 
 
-def _create_dataLoader(dsets, batch_size,  pin_memory=False, use_shuffle=True):
+def _create_dataLoader(dsets, batch_size,  pin_memory=False, use_shuffle=False):
     '''Arguments: 
         dset: Dictionary with datasets for train, validation and test;
         
@@ -20,9 +20,9 @@ def _create_dataLoader(dsets, batch_size,  pin_memory=False, use_shuffle=True):
     '''
     dset_loaders = {}
    
-
+    shuffle = False
     for key in dsets.keys():
-        if use_shuffle == True:
+        if use_shuffle:
             if key != 'test':
                 shuffle = True
             else:
