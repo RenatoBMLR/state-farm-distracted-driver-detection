@@ -27,3 +27,16 @@ def create_submission(result, info):
     sub_file = os.path.join('subm', 'submission_' + suffix + '.csv')
     result_sample.to_csv(sub_file, index=False)
     print('done!')
+    
+    
+    
+def metrics2csv(trainer, info):    
+    now = datetime.datetime.now()
+    if not os.path.isdir('metrics'):
+        os.mkdir('metrics')
+    suffix = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
+    sub_file = os.path.join('metrics', 'metrics_' + suffix + '.csv')
+    df = pd.DataFrame(trainer.metrics)
+
+    df.to_csv(sub_file, index=False)
+    print('done!')

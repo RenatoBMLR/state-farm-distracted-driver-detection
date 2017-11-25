@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import ast
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -101,19 +102,21 @@ def classDistribution(dataset, path2save= './figures/class_distribution.png'):
     path2save = './figures/distribution_classes.png'
     fig.savefig(path2save)
     
-def plot_metrics(trainer): 
+def plot_metrics(metrics): 
 
     path2save = './figures/results_metrics.png'
 
-    fig = plt.figure(figsize=(10,5))
     metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
 
-    metrics_eval_nb = len(trainer.metrics['train'].keys())
+    metrics_eval_nb = len(metrics['train'].keys())
+    
+    fig = plt.figure(figsize=(10*metrics_eval_nb,5))
+
     count = 1
-    for metric in trainer.metrics['train'].keys():
+    for metric in metrics['train'].keys():
         plt.subplot(1,metrics_eval_nb, count)
-        plt.plot(trainer.metrics['train'][metric], 'o-b', label = 'train')
-        plt.plot(trainer.metrics['valid'][metric], 'o-r', label = 'valid')
+        plt.plot(ast.literal_eval(metrics['train'][metric]), 'o-b', label = 'train')
+        plt.plot(ast.literal_eval(metrics['valid'][metric]), 'o-r', label = 'valid')
         count += 1
         plt.xlabel('Epochs', fontsize = 12)
         plt.ylabel(metrics_map[metric], fontsize = 12)
