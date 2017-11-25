@@ -71,8 +71,8 @@ def features_saving(path2data,convOutput):
         np.savez(path2data+key+"/"+convOutput[key][2]+"Features.npz",**data)
         print('Saved in:'+path2data+key+"/"+convOutput[key][2]+"Features.npz")
 
+
 def features_loading(path2data,model_name,use_gpu=False):
-    
     l = ['train','valid','test']
     data ={'train':(),
            'valid':(),
@@ -83,14 +83,13 @@ def features_loading(path2data,model_name,use_gpu=False):
         npzfile = np.load(path2data+i+"/"+model_name+"Features.npz")
 
         if use_gpu:
-            data[i]= (torch.from_numpy(npzfile['pred']).cuda(),torch.from_numpy(npzfile['true']).cuda())
+            data[i]= (torch.from_numpy(npzfile['true']).cuda(),torch.from_numpy(npzfile['pred']).cuda())
 
         else:
-            data[i]=  (torch.from_numpy(npzfile['pred']), torch.from_numpy(npzfile['true']))
+            data[i]=  (torch.from_numpy(npzfile['true']), torch.from_numpy(npzfile['pred']))
 
             print('\n'+i+':')
             print("true {}, pred {}".format(data[i][0].shape,data[i][1].shape))
 
     return data
-
 
