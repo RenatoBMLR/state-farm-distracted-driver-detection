@@ -44,27 +44,53 @@ def getPrediction(result):
     result['pred'] = predicted.cpu().numpy()
     result['true'] = result['true'].cpu().numpy()
     return result 
-    
-def features_saving(path2data,convOutput,use_resnet=False,use_inception=False,use_denseNet=False):
+
+
+
+
+def features_saving(path2data,convOutput):
     """ This function saves the features extracted by the model as 'npz' archive of numpy arrays. 
      Arguments:
      path2data: Path to save the features.
-     convOutput: Dictinary with features extracted (tensors)
-     use_resnet: Flag to chose the name of the archive corresponding to model used;
-     use_inception: Flag to chose the name of the archive corresponding to model used;
-     use_denseNet: Flag to chose the name of the archive corresponding to model used;
+     convOutpu: Dictinary with features extracted (tensors)
     
     """
-    data ={'true':convOutput['true'].numpy(),
-           'pred':convOutput['pred'].numpy()}
-    if use_resnet:
-        print('Saving ResNet features') 
-        np.savez(path2data+"ResNetFeatures.npz",**data)
-    elif use_inception:
-        print('Saving Inception features')
-        np.savez(path2data+"InceptionFeatures.npz",**data)
-    elif use_denseNet:
-        print('Saving DenseNet features')    
-        np.savez(path2data+"DenseNetFeatures.npz",**data)    
+
     
+    for key in convOutput.keys():
+        if convOutput[key][0].is_cuda: 
+
+            data ={'true':convOutput[key][0].cpu().numpy(),
+                   'pred':convOutput[key][1].cpu().numpy()}
+        else:
+
+            data ={'true':convOutput[key][0].numpy(),
+                   'pred':convOutput[key][1].numpy()}
+        
+        print('\nSaving '+convOutput[key][2]+' '+ key+' features') 
+        np.savez(path2data+key+"/"+convOutput[key][2]+"Features.npz",**data)
+        print('Saved in:'+path2data+key+"/"+convOutput[key][2]+"Features.npz")
+
+def features_loading(path2data,model_name,use_gpu=False):
     
+    l = ['train','valid','test']
+    data ={'train':(),
+           'valid':(),
+           'test':(),}
+    
+    print("Loaded features with shapes: \n")
+    for i in l:
+        npzfile = np.load(path2data+i+"/"+model_name+"Features.npz")
+
+        if use_gpu:
+            data[i]= (torch.from_numpy(npzfile['pred']).cuda(),torch.from_numpy(npzfile['true']).cuda())
+
+        else:
+            data[i]=  (torch.from_numpy(npzfile['pred']), torch.from_numpy(npzfile['true']))
+
+            print('\n'+i+':')
+            print("true {}, pred {}".format(data[i][0].shape,data[i][1].shape))
+
+    return data
+
+
