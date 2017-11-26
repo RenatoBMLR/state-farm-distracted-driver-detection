@@ -32,14 +32,14 @@ def save_results(results, info, use_gpu = False):
  
     now = datetime.datetime.now()    
     
-    for key in predictions_out.keys():
+    for key in results.keys():
 
         if use_gpu:
-            data_aux =  {'pred':predictions_out[key]['pred'].cpu().numpy(),
-                       'true':predictions_out[key]['true'].cpu().numpy()}
+            data_aux =  {'pred':results[key]['pred'].cpu().numpy(),
+                       'true':results[key]['true'].cpu().numpy()}
         else:
-            data_aux =  {'pred':predictions_out[key]['pred'].numpy(),
-                       'true':predictions_out[key]['true'].numpy()}
+            data_aux =  {'pred':results[key]['pred'].numpy(),
+                       'true':results[key]['true'].numpy()}
         
         if not os.path.isdir('results'):
             os.mkdir('results')
