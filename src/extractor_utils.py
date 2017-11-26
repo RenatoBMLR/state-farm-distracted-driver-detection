@@ -27,7 +27,7 @@ def predict(dset_loaders, model,use_gpu=False):
             inputs = inputs.cuda()
             labels = labels.cuda()
             
-        inputs = Variable(inputs)
+        inputs = Variable(inputs,volatile=True)
         predictions.append(model(inputs).data)
         labels_lst.append(labels)
 
@@ -89,7 +89,7 @@ def features_loading(path2data,model_name,use_gpu=False):
             data[i]=  (torch.from_numpy(npzfile['true']), torch.from_numpy(npzfile['pred']))
 
             print('\n'+i+':')
-            print("true {}, pred {}".format(data[i][0].shape,data[i][1].shape))
+            print("pred {}, true {}".format(data[i][0].shape,data[i][1].shape))
 
     return data
 
