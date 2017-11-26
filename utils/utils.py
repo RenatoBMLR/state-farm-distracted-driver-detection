@@ -28,19 +28,26 @@ def create_submission(result, info):
     result_sample.to_csv(sub_file, index=False)
     print('done!')
     
-def save_results(results, info):    
-    for key in results.keys():
+def save_results(results, info, use_gpu = False):   
+ 
+    now = datetime.datetime.now()    
+    
+    for key in predictions_out.keys():
 
-        data ={'pred':results[key]['pred'].cpu().numpy(),
-                   'true':results[key]['true'].cpu().numpy()}
-
-        now = datetime.datetime.now()
+        if use_gpu:
+            data_aux =  {'pred':predictions_out[key]['pred'].cpu().numpy(),
+                       'true':predictions_out[key]['true'].cpu().numpy()}
+        else:
+            data_aux =  {'pred':predictions_out[key]['pred'].numpy(),
+                       'true':predictions_out[key]['true'].numpy()}
+        
         if not os.path.isdir('results'):
             os.mkdir('results')
         suffix = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
-        sub_file = os.path.join('results', 'results_' + suffix + '.npz')
-        np.savez(sub_file,**data)
-        print('Save result from '+ key + ' set ' + 'done!')
+        sub_file = os.path.join('results', 'results_' + key + '_' + suffix + '.npz')
+        np.savez(sub_file,**data_aux)
+        print(key + ' set result' +' saved!')
+        
     
 def metrics2csv(trainer, info):    
     now = datetime.datetime.now()
