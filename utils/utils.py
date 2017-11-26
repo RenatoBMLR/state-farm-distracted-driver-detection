@@ -28,16 +28,19 @@ def create_submission(result, info):
     result_sample.to_csv(sub_file, index=False)
     print('done!')
     
-def results2csv(results, info):    
-    now = datetime.datetime.now()
-    if not os.path.isdir('results'):
-        os.mkdir('results')
-    suffix = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
-    sub_file = os.path.join('results', 'results_' + suffix + '.csv')
-    df = pd.DataFrame(results)
+def save_results(results, info):    
+    for key in results.keys():
 
-    df.to_csv(sub_file, index=False)
-    print('done!')
+        data ={'pred':results[key]['pred'].cpu().numpy(),
+                   'true':results[key]['true'].cpu().numpy()}
+
+        now = datetime.datetime.now()
+        if not os.path.isdir('results'):
+            os.mkdir('results')
+        suffix = info + '_' + str(now.strftime("%Y-%m-%d-%H-%M"))
+        sub_file = os.path.join('results', 'results_' + suffix + '.npz')
+        np.savez(sub_file,**data)
+        print('Save result from '+ key + ' set ' + 'done!')
     
 def metrics2csv(trainer, info):    
     now = datetime.datetime.now()
