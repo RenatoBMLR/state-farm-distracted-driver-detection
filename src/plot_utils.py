@@ -8,9 +8,7 @@ from src.imgnet_utils import denormalize
 import torchvision
 import torch
 from torch.autograd import Variable
-
-
-
+from matplotlib.ticker import MaxNLocator
 
 
 # Class labels
@@ -24,8 +22,6 @@ labels = {  'c0' : 'safe driving',
             'c7' : 'reaching behind', 
             'c8' : 'hair and makeup', 
             'c9' : 'talking to passenger'}
-
-
 
 
 def plot_classes(dset_loaders, path2save = './figures/data.png'):
@@ -102,9 +98,11 @@ def classDistribution(dataset, path2save= './figures/class_distribution.png'):
     path2save = './figures/distribution_classes.png'
     fig.savefig(path2save)
     
-def plot_metrics(metrics): 
+    
 
-    path2save = './figures/results_metrics.png'
+
+def plot_metrics(metrics, path2save = []): 
+
 
     metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
 
@@ -114,16 +112,20 @@ def plot_metrics(metrics):
 
     count = 1
     for metric in metrics['train'].keys():
-        plt.subplot(1,metrics_eval_nb, count)
-        plt.plot(ast.literal_eval(metrics['train'][metric]), 'o-b', label = 'train')
-        plt.plot(ast.literal_eval(metrics['valid'][metric]), 'o-r', label = 'valid')
+        ax = fig.add_subplot(1,metrics_eval_nb, count)
+        ax.plot(range(len(ast.literal_eval(metrics['train'][metric]))), ast.literal_eval(metrics['train'][metric]), 'o-b', label = 'train')
+        ax.plot(range(len(ast.literal_eval(metrics['train'][metric]))), ast.literal_eval(metrics['valid'][metric]), 'o-r', label = 'valid')
         count += 1
-        plt.xlabel('Epochs', fontsize = 12)
-        plt.ylabel(metrics_map[metric], fontsize = 12)
-        plt.title(metrics_map[metric] + " during the model's training", fontsize = 16)
-        plt.grid('on')
-        plt.legend()
-    fig.savefig(path2save)
+        
+        ax.set_xlabel('Epochs', fontsize = 12)
+        ax.set_ylabel(metrics_map[metric], fontsize = 12)
+        ax.set_title(metrics_map[metric] + " during the model's training", fontsize = 16)
+        ax.grid('on')
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.legend()
+        
+        if len(path2save) !=0:
+            fig.savefig(path2save)
 
         
 def visualize_predictions(dsets, lst, results, path2save = []):
