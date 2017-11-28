@@ -5,10 +5,9 @@ import torch
 import numpy as np
 
 def create_submission(result, info):
-    
-    m = torch.nn.Softmax()
-    predictions =  np.around(m(result['pred']).cpu().data.numpy(), decimals=1).tolist()
-    
+    predictions =  softmax(result['pred']).cpu().data.numpy().tolist()
+    predictions = np.around(predictions, decimals=3)
+    predictions = np.clip(predictions, 0.001, 0.999)    
     test_id = result['true'].tolist()
     for i in range(0, len(test_id)):
         test_id[i] = 'img_'+ str(test_id[i]) + '.jpg'
