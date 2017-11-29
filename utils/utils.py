@@ -3,11 +3,15 @@ import os
 import datetime
 import torch
 import numpy as np
+from torch.nn.functional import softmax  
 
 def create_submission(result, info):
-    predictions =  softmax(result['pred']).cpu().data.numpy().tolist()
-    predictions = np.around(predictions, decimals=3)
-    predictions = np.clip(predictions, 0.001, 0.999)    
+    
+    predictions = softmax(result['pred']).cpu().data.numpy().tolist()
+    predictions = np.around(predictions, decimals=7)
+    predictions = np.clip(predictions, 0.0000001, 0.9999999) 
+    predictions[predictions < 0.0001] = 0
+
     test_id = result['true'].tolist()
     for i in range(0, len(test_id)):
         test_id[i] = 'img_'+ str(test_id[i]) + '.jpg'
