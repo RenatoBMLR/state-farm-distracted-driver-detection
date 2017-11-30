@@ -1,3 +1,5 @@
+import os
+
 import torchvision
 import torch
 from torch.autograd import Variable
@@ -67,12 +69,14 @@ def features_saving(path2data,convOutput):
 
             data ={'pred':convOutput[key][0].numpy(),
                    'true':convOutput[key][1].numpy()}
+        if not os.path.isdir(path2data + key):
+            os.mkdir(path2data + key)
         
         print('\nSaving '+convOutput[key][2]+' '+ key+' features') 
         np.savez(path2data+key+"/"+convOutput[key][2]+"Features.npz",**data)
         print('Saved in:'+path2data+key+"/"+convOutput[key][2]+"Features.npz")
-
-
+        
+        
 def features_loading(path2data,model_name,use_gpu=False):
     l = ['train','valid','test']
     data ={'train':(),
