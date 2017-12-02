@@ -51,7 +51,7 @@ def getPrediction(result):
 
 
 
-def features_saving(path2data,convOutput):
+def save_prediction(path2data,convOutput):
     """ This function saves the features extracted by the model as 'npz' archive of numpy arrays. 
      Arguments:
      path2data: Path to save the features.
@@ -72,12 +72,12 @@ def features_saving(path2data,convOutput):
         if not os.path.isdir(path2data + key):
             os.mkdir(path2data + key)
         
-        print('\nSaving '+convOutput[key][2]+' '+ key+' features') 
-        np.savez(path2data+key+"/"+convOutput[key][2]+"Features.npz",**data)
-        print('Saved in:'+path2data+key+"/"+convOutput[key][2]+"Features.npz")
+        print('\nSaving '+convOutput[key][2]+' '+ key) 
+        np.savez(path2data+key+"/"+convOutput[key][2]+".npz",**data)
+        print('Saved in:'+path2data+key+"/"+convOutput[key][2]+".npz")
         
         
-def features_loading(path2data,model_name,use_gpu=False):
+def load_prediction(path2data,model_name,use_gpu=False):
     l = ['train','valid','test']
     data ={'train':(),
            'valid':(),
@@ -85,7 +85,7 @@ def features_loading(path2data,model_name,use_gpu=False):
     
     print("Loaded features with shapes: \n")
     for i in l:
-        npzfile = np.load(path2data+i+"/"+model_name+"Features.npz")
+        npzfile = np.load(path2data+i+"/"+model_name+".npz")
 
         if use_gpu:
             data[i]= (torch.from_numpy(npzfile['true']).cuda(),torch.from_numpy(npzfile['pred']).cuda())
