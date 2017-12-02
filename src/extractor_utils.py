@@ -1,11 +1,18 @@
 import os
-
-import torchvision
-import torch
-from torch.autograd import Variable
-import torch.nn.functional as F
 import numpy as np
+import numpy.random as nr
+import copy
+
+
+import torch
+import torchvision
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.autograd import Variable
 from torch.nn.modules.module import _addindent
+
+
+import lib.pytorch_trainer as ptt
 
 #********************************************           Predicting Features       *********************************************** 
 
@@ -97,6 +104,102 @@ def load_prediction(path2data,model_name,use_gpu=False):
             print("pred {}, true {}".format(data[i][0].shape,data[i][1].shape))
 
     return data
+
+
+def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_IT,verbose):
+    '''
+    This function searchs for best lr and weight_decay parameters of a given model
+     Args:
+        param: Dictionary with parameters as follow: 
+                    params = { 'model' : Instance of model, 
+                               'criterion': Loss function used,  
+                               'optimizer': instance of optimizer, 
+                               'callbacks': list of callbacks }
+
+        args: Dictionary with minimum and max values of lr and weight decay. Example: 
+                    args= {'lr':[1e-5,1e-2],
+                           'weight_decay':[1e-8,1e-3] }
+                           
+        num_epochs: Number of epochs to train in each iteration
+        path2saveModel: Path to load model weights of best epoch in each itearation 
+        dset_loaders_convnet: Data loaders with train and valid tensors
+        MAX_IT: Number of maximum interation
+        verbose: 0 None, 1 little, 2 full verbose
+        
+    returns: Best result and Best parameters
+    '''
+
+
+    results=[]
+
+    l={}
+    
+    for name, value in args.items():
+        l[name] = nr.permutation(nr.uniform(low= value[0],
+                                                 high=value[1],size=10*MAX_IT))
+   
+    
+    # Saving natural state of model
+    natural_state = param['model'].state_dict()
+
+    # Copy search space to get best_parameters later on
+    searchSpace = copy.deepcopy(l)
+
+    for i in range(MAX_IT):
+
+        if verbose >0:    
+            print('Iteration {}/{}'.format(i,MAX_IT))
+        
+        # Reseting model weights and adjusting optimizer parameters
+        param['model'].load_state_dict(natural_state)
+        param['optimizer'] = optim.Adam(param['model'].parameters(), 
+                                        lr = l['lr'][i],
+                                        weight_decay = l['weight_decay'][i]) 
+        
+        
+        # Trainning model 
+        trainer = ptt.DeepNetTrainer(use_gpu=True,**param)
+       
+        trainer.fit_loader(num_epochs,
+                           dset_loaders_convnet['train'],
+                           dset_loaders_convnet['valid'])
+
+        # Taking best results
+        trainer.load_state(path2saveModel)
+
+        train_eval = trainer.evaluate_loader(dset_loaders_convnet['train'],verbose=verbose)
+        valid_eval = trainer.evaluate_loader(dset_loaders_convnet['valid'],verbose=verbose)
+
+        results.append([valid_eval['losses'],train_eval['losses']])
+
+        if verbose >= 1:    
+            print('train_loss: {}, val_loss {}'.format(train_eval['losses'],
+                                                       valid_eval['losses']))
+            if verbose > 1 :
+                print('lr: {}, weight_decay: {}'.format(l['lr'][i],
+                                                       l['weight_decay'][i]))
+
+                
+        # Removing parameters used
+        l['lr'] = np.delete(l['lr'],i)
+        l['weight_decay'] = np.delete(l['weight_decay'],i)
+
+        
+
+    # Getting best result
+    best_result = min(results)
+
+    # Getting best parameters
+    index = results.index(best_result)    
+    best_parameters={'lr': searchSpace['lr'][index],
+                    'weight_decay':searchSpace['weight_decay'][index]}
+    
+        
+    return best_result,best_parameters
+
+
+
+
 
 def torch_summarize(model, show_weights=True, show_parameters=True):
     """Summarizes torch model by showing trainable parameters and weights."""
