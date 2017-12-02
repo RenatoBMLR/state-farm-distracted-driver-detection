@@ -63,12 +63,12 @@ def features_saving(path2data,convOutput):
     for key in convOutput.keys():
         if convOutput[key][0].is_cuda: 
 
-            data ={'pred':convOutput[key][0].cpu().numpy(),
-                   'true':convOutput[key][1].cpu().numpy()}
+            data ={'true':convOutput[key][0].cpu().numpy(),
+                   'pred':convOutput[key][1].cpu().numpy()}
         else:
 
-            data ={'pred':convOutput[key][0].numpy(),
-                   'true':convOutput[key][1].numpy()}
+            data ={'true':convOutput[key][0].numpy(),
+                   'pred':convOutput[key][1].numpy()}
         if not os.path.isdir(path2data + key):
             os.mkdir(path2data + key)
         
