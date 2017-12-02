@@ -126,7 +126,7 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         MAX_IT: Number of maximum interation
         verbose: 0 None, 1 little, 2 full verbose
         
-    returns: Best result and Best parameters
+    returns: History val_loss and train loss, Best result, Best parameters, Best Model
     '''
 
 
@@ -149,7 +149,7 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
 
         if verbose >0:    
             print('Iteration {}/{}'.format(i,MAX_IT))
-        
+                
         # Reseting model weights and adjusting optimizer parameters
         param['model'].load_state_dict(natural_state)
         param['optimizer'] = optim.Adam(param['model'].parameters(), 
@@ -170,7 +170,9 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         train_eval = trainer.evaluate_loader(dset_loaders_convnet['train'],verbose=verbose)
         valid_eval = trainer.evaluate_loader(dset_loaders_convnet['valid'],verbose=verbose)
 
-        results.append([valid_eval['losses'],train_eval['losses']])
+        results.append([valid_eval['losses'],
+                        train_eval['losses'],
+                        trainer])
 
         if verbose >= 1:    
             print('train_loss: {}, val_loss {}'.format(train_eval['losses'],
@@ -192,10 +194,20 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     # Getting best parameters
     index = results.index(best_result)    
     best_parameters={'lr': searchSpace['lr'][index],
-                    'weight_decay':searchSpace['weight_decay'][index]}
+                     'weight_decay': searchSpace['weight_decay'][index]}
+
+    # Getting best model
+    best_trainer = results[index][2]
+    best_model = best_trainer.model
+    torch.save(best_model.state_dict(), path2saveModel + '.model')
     
+    
+    # History of valid_loss and train_loss
+    history = []
+    history = [x[:2] for x in results]
+
         
-    return best_result,best_parameters
+    return history,best_result,best_parameters,best_model
 
 
 
