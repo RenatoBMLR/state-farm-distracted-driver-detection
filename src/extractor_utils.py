@@ -2,7 +2,7 @@ import os
 import numpy as np
 import numpy.random as nr
 import copy
-
+import time
 
 import torch
 import torchvision
@@ -126,7 +126,11 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         MAX_IT: Number of maximum interation
         verbose: 0 None, 1 little, 2 full verbose
         
-    returns: History val_loss and train loss, Best result, Best parameters, Best Model
+    returns: Dictionary with: history: val_loss and train loss,
+                              Best result,
+                              Best parameters,
+                              Best Model,
+                              Best Trainer
     '''
 
 
@@ -146,10 +150,13 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     searchSpace = copy.deepcopy(l)
 
     for i in range(MAX_IT):
-
+        # Getting start time 
+        start_time = time.time()
+        
         if verbose >0:    
             print('Iteration {}/{}'.format(i,MAX_IT))
-                
+            if verbose ==2: 
+                param['callbacks'].append(ptt.PrintCallback())
         # Reseting model weights and adjusting optimizer parameters
         param['model'].load_state_dict(natural_state)
         param['optimizer'] = optim.Adam(param['model'].parameters(), 
@@ -177,7 +184,8 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         if verbose >= 1:    
             print('train_loss: {}, val_loss {}'.format(train_eval['losses'],
                                                        valid_eval['losses']))
-            if verbose > 1 :
+            print ('Execution time :{} s'.format(time.time() - start_time))
+            if verbose == 2 :
                 print('lr: {}, weight_decay: {}'.format(l['lr'][i],
                                                        l['weight_decay'][i]))
 
@@ -206,8 +214,14 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     history = []
     history = [x[:2] for x in results]
 
+    output={'history':history,
+            'best_result':best_result,
+            'best_parameters':best_parameters,
+            'best_model':best_model,
+            'best_trainer':best_trainer,
+            }
         
-    return history,best_result,best_parameters,best_model
+    return output
 
 
 
