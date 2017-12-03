@@ -149,14 +149,19 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     # Copy search space to get best_parameters later on
     searchSpace = copy.deepcopy(l)
 
+    # Adding PrintCallback
+    if verbose ==2: 
+        param['callbacks'].append(ptt.PrintCallback())
+
+
+    
     for i in range(MAX_IT):
         # Getting start time 
         start_time = time.time()
         
         if verbose >0:    
             print('Iteration {}/{}'.format(i,MAX_IT))
-            if verbose ==2: 
-                param['callbacks'].append(ptt.PrintCallback())
+                
         # Reseting model weights and adjusting optimizer parameters
         param['model'].load_state_dict(natural_state)
         param['optimizer'] = optim.Adam(param['model'].parameters(), 
@@ -177,9 +182,12 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         train_eval = trainer.evaluate_loader(dset_loaders_convnet['train'],verbose=verbose)
         valid_eval = trainer.evaluate_loader(dset_loaders_convnet['valid'],verbose=verbose)
 
+        # Deep copy of trainer
+        obj = copy.deepcopy(trainer)
+
         results.append([valid_eval['losses'],
                         train_eval['losses'],
-                        trainer])
+                        obj])
 
         if verbose >= 1:    
             print('train_loss: {}, val_loss {}'.format(train_eval['losses'],
@@ -207,6 +215,9 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     # Getting best model
     best_trainer = results[index][2]
     best_model = best_trainer.model
+
+    if  os.path.isfile(path2saveModel+'.model'):
+        os.unlink(path2saveModel + '.model')
     torch.save(best_model.state_dict(), path2saveModel + '.model')
     
     
