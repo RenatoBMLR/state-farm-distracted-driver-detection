@@ -205,7 +205,6 @@ def plot_layers_weight(dsets,img_width, img_height, conv_model,use_gpu, ncols = 
         plt.show()
 
 
-
 def models_comparasion(models, m = 'acc', path2save = []):
 
     metrics_dict = {}
@@ -215,30 +214,30 @@ def models_comparasion(models, m = 'acc', path2save = []):
 
 
     metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
-
+    eval = {'train': [], 'valid': []}
     for model in models:
 
         path2metrics = './metrics/metrics_'+ model+'.csv'
         metrics = pd.read_csv(path2metrics).to_dict()
         metrics = rename_metrics_keys(metrics)
         metrics_dict[model] = metrics
-        eval[model] = {}
+
         for daset in metrics_dict[model].keys():
-            eval[model][daset]={}
-            eval[model][daset]['min_losses']=np.min(ast.literal_eval(metrics_dict[model][daset][m]))
-            if (daset == 'train'):
-                train_lst.append(np.min(ast.literal_eval(metrics_dict[model][daset][m])))
-            elif (daset == 'valid'):
-                valid_lst.append(np.min(ast.literal_eval(metrics_dict[model][daset][m])))
+            if m == 'losses':
+                x=np.min(ast.literal_eval(metrics_dict[model][daset][m]))
+            else:
+                x=np.max(ast.literal_eval(metrics_dict[model][daset][m]))
+            eval[daset].append(x)
 
-
-    ind = np.arange(len(train_lst))  # the x locations for the groups
+    ind = np.arange(len(models))  # the x locations for the groups
     width = 0.15       # the width of the bars
 
+    print(metrics_map[m] + ' Training set: {}'.format(eval['train']) )
+    print(metrics_map[m] + ' Valid set: {}'.format(eval['valid']) )
     fig = plt.figure(figsize=(15, 5))
     ax = fig.add_subplot(111)
-    rects1 = ax.bar(ind, train_lst, width, color='r')
-    rects2 = ax.bar(ind + width, valid_lst, width, color='y')
+    rects1 = ax.bar(ind, eval['train'], width, color='r')
+    rects2 = ax.bar(ind + width, eval['valid'], width, color='y')
 
     # add some text for labels, title and axes ticks
     ax.set_ylabel(m)
@@ -247,6 +246,6 @@ def models_comparasion(models, m = 'acc', path2save = []):
     ax.set_xticklabels(tuple(models))
 
     ax.legend((rects1[0], rects2[0]), ('train', 'valid'))
-    
+
     if (len(path2save)) !=0:
-        fig.savefig(path2save)    
+        fig.savefig(path2save)
