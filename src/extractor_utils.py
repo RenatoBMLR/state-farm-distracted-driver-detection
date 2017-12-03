@@ -3,6 +3,7 @@ import numpy as np
 import numpy.random as nr
 import copy
 import time
+import datetime
 
 import torch
 import torchvision
@@ -224,14 +225,17 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     # History of valid_loss and train_loss
     history = []
     history = [x[:2] for x in results]
-
+    
     output={'history':history,
             'best_result':best_result,
             'best_parameters':best_parameters,
             'best_model':best_model,
             'best_trainer':best_trainer,
             }
-        
+    
+    # Saving history for further analysis 
+    np.savez(path2saveModel+'History',*output['history'])
+    
     return output
 
 
