@@ -4,8 +4,6 @@ import datetime
 import torch
 import numpy as np
 from torch.nn.functional import softmax  
-
-def create_submission(result, info):
     
 def create_submission(result, info):
     

@@ -95,14 +95,25 @@ def classDistribution(dataset, path2save= './figures/class_distribution.png'):
     plt.xticks(rotation=90)
     plt.title("Classes Distribution", fontsize=15)
     plt.show()
-    path2save = './figures/distribution_classes.png'
     fig.savefig(path2save)
     
     
 
+def rename_metrics_keys(metrics):
+    
+    #renaming dictionary keys
+    metrics['train']['acc'] = metrics['train'].pop(0)
+    metrics['train']['losses'] = metrics['train'].pop(1)
 
-def plot_metrics(metrics, path2save = []): 
+    metrics['valid']['acc'] = metrics['valid'].pop(0)
+    metrics['valid']['losses'] = metrics['valid'].pop(1)
+    return metrics
 
+
+def plot_metrics(path2metrics, path2save = []): 
+
+    metrics = pd.read_csv(path2metrics).to_dict()
+    metrics = rename_metrics_keys(metrics)
 
     metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
 
@@ -148,18 +159,22 @@ def visualize_predictions(dsets, lst, results, path2save = []):
 
 def plot_confusion(results):
     mc = np.array(pd.crosstab(results['pred'], results['true']))
-    plt.imshow(mc/mc.sum(axis=1))
+    path2save = './figures/distribution_classes.png'
+    path2save = './figures/distribution_classes.png'
+    plt.imshow(mc/mc.sum(axis=1), cmap = 'jet')
     plt.colorbar()
     plt.axis('off')
     
-def plot_cm_train_valid(result_train,result_valid):    
-    plt.figure(figsize=(20,5))
+def plot_cm_train_valid(result_train,result_valid, path2save = []):    
+    fig = plt.figure(figsize=(20,5))
     plt.subplot(1,2,1)
     plot_confusion(result_train)
     plt.title('Train dataset')
     plt.subplot(1,2,2)
     plot_confusion(result_valid)
     plt.title('Valid dataset')
+    if (len(path2save)) != 0:
+        fig.savefig(path2save)
 
     
 def plot_layers_weight(dsets,img_width, img_height, conv_model,use_gpu, ncols = 8, H = 14, W=30):
@@ -187,4 +202,51 @@ def plot_layers_weight(dsets,img_width, img_height, conv_model,use_gpu, ncols = 
         plt.imshow(grid.transpose((1,2,0)))
         plt.title(name)
         plt.axis('off')
-        plt.show()    
+        plt.show()
+
+
+
+def models_comparasion(models, m = 'acc', path2save = []):
+
+    metrics_dict = {}
+    eval = {}
+    train_lst = []
+    valid_lst = []
+
+
+    metrics_map = {'losses': 'Loss', 'acc': 'Acuracy'}
+
+    for model in models:
+
+        path2metrics = './metrics/metrics_'+ model+'.csv'
+        metrics = pd.read_csv(path2metrics).to_dict()
+        metrics = rename_metrics_keys(metrics)
+        metrics_dict[model] = metrics
+        eval[model] = {}
+        for daset in metrics_dict[model].keys():
+            eval[model][daset]={}
+            eval[model][daset]['min_losses']=np.min(ast.literal_eval(metrics_dict[model][daset][m]))
+            if (daset == 'train'):
+                train_lst.append(np.min(ast.literal_eval(metrics_dict[model][daset][m])))
+            elif (daset == 'valid'):
+                valid_lst.append(np.min(ast.literal_eval(metrics_dict[model][daset][m])))
+
+
+    ind = np.arange(len(train_lst))  # the x locations for the groups
+    width = 0.15       # the width of the bars
+
+    fig = plt.figure(figsize=(15, 5))
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, train_lst, width, color='r')
+    rects2 = ax.bar(ind + width, valid_lst, width, color='y')
+
+    # add some text for labels, title and axes ticks
+    ax.set_ylabel(m)
+    ax.set_title(metrics_map[m] + ' obtained during the training')
+    ax.set_xticks(ind + width / 2)
+    ax.set_xticklabels(tuple(models))
+
+    ax.legend((rects1[0], rects2[0]), ('train', 'valid'))
+    
+    if (len(path2save)) !=0:
+        fig.savefig(path2save)    
