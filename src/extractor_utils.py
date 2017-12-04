@@ -107,6 +107,36 @@ def load_prediction(path2data,model_name,use_gpu=False):
     return data
 
 
+
+
+
+def torch_summarize(model, show_weights=True, show_parameters=True):
+    """Summarizes torch model by showing trainable parameters and weights."""
+    tmpstr = model.__class__.__name__ + ' (\n'
+    for key, module in model._modules.items():
+        # if it contains layers let call it recursively to get params and weights
+        if type(module) in [
+            torch.nn.modules.container.Container,
+            torch.nn.modules.container.Sequential
+        ]:
+            modstr = torch_summarize(module)
+        else:
+            modstr = module.__repr__()
+        modstr = _addindent(modstr, 2)
+
+        params = sum([np.prod(p.size()) for p in module.parameters()])
+        weights = tuple([tuple(p.size()) for p in module.parameters()])
+
+        tmpstr += '  (' + key + '): ' + modstr 
+        if show_weights:
+            tmpstr += ', weights={}'.format(weights)
+        if show_parameters:
+            tmpstr +=  ', parameters={}'.format(params)
+        tmpstr += '\n'   
+
+    tmpstr = tmpstr + ')'
+    return tmpstr
+
 def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_IT,verbose):
     '''
     This function searchs for best lr and weight_decay parameters of a given model
@@ -145,7 +175,7 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
    
     
     # Saving natural state of model
-    natural_state = param['model'].state_dict()
+    natural_state = copy.deepcopy(param['model'].state_dict())
 
     # Copy search space to get best_parameters later on
     searchSpace = copy.deepcopy(l)
@@ -237,35 +267,3 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
     np.savez(path2saveModel+'History',*output['history'])
     
     return output
-
-
-
-
-
-def torch_summarize(model, show_weights=True, show_parameters=True):
-    """Summarizes torch model by showing trainable parameters and weights."""
-    tmpstr = model.__class__.__name__ + ' (\n'
-    for key, module in model._modules.items():
-        # if it contains layers let call it recursively to get params and weights
-        if type(module) in [
-            torch.nn.modules.container.Container,
-            torch.nn.modules.container.Sequential
-        ]:
-            modstr = torch_summarize(module)
-        else:
-            modstr = module.__repr__()
-        modstr = _addindent(modstr, 2)
-
-        params = sum([np.prod(p.size()) for p in module.parameters()])
-        weights = tuple([tuple(p.size()) for p in module.parameters()])
-
-        tmpstr += '  (' + key + '): ' + modstr 
-        if show_weights:
-            tmpstr += ', weights={}'.format(weights)
-        if show_parameters:
-            tmpstr +=  ', parameters={}'.format(params)
-        tmpstr += '\n'   
-
-    tmpstr = tmpstr + ')'
-    return tmpstr
-

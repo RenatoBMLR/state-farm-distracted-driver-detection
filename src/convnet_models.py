@@ -40,8 +40,10 @@ class MyResNetDens(torch.nn.Module):
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens3(x)
         return x
 
@@ -95,9 +97,12 @@ class MyInceptiontDens(torch.nn.Module):
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens3(x)
+
 
         return x
 
@@ -147,10 +152,11 @@ class MyDenseNetDens(torch.nn.Module):
     def forward(self, x):
         x = self.dens1(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens2(x)
         x = torch.nn.functional.selu(x)
+        x = F.dropout(x, p=0.25, training=self.training)
         x = self.dens3(x)
-
         return x
 
 
