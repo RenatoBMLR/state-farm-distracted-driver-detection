@@ -31,6 +31,7 @@ def predict(dset_loaders, model,use_gpu=False):
     predictions = []
     labels_lst = []
     ii_n = len(dset_loaders)
+    start_time = time.time()
 
     for i, (inputs, labels) in enumerate(dset_loaders):
         
@@ -44,6 +45,7 @@ def predict(dset_loaders, model,use_gpu=False):
 
         print('\rpredict: {}/{}'.format(i, ii_n - 1), end='')
     print(' ok')
+    print('Execution time {0:.2f} s'.format(round(time.time()- start_time), 2))
     if len(predictions) > 0:
         return {'pred': torch.cat(predictions, 0), 'true':torch.cat(labels_lst, 0) }
 
@@ -223,7 +225,9 @@ def RandomSearch(param,args,num_epochs,path2saveModel,dset_loaders_convnet,MAX_I
         if verbose >= 1:    
             print('train_loss: {}, val_loss {}'.format(train_eval['losses'],
                                                        valid_eval['losses']))
-            print ('Execution time :{} s'.format(time.time() - start_time))
+
+
+            print ('Execution time :{0:.2f} s'.format(round(time.time() - start_time), 2))
             if verbose == 2 :
                 print('lr: {}, weight_decay: {}'.format(l['lr'][i],
                                                        l['weight_decay'][i]))
